@@ -1,8 +1,14 @@
 const mainLink = "https://novelfire.net/home";
 
-// compatibility header for HWV bridge + jQuery loader
-const name = typeof name !== "undefined" ? name : "NovelFire";
-const version = typeof version !== "undefined" ? version : "2.0.0";
+//compat header
+const APP_NAME =
+	typeof globalThis.NOVELFIRE_NAME !== "undefined"
+		? globalThis.NOVELFIRE_NAME
+		: "NovelFire";
+const APP_VERSION =
+	typeof globalThis.NOVELFIRE_VERSION !== "undefined"
+		? globalThis.NOVELFIRE_VERSION
+		: "0.0.3";
 
 async function _ensureJQ() {
 	if (window.$ && typeof window.$ === "function") return;
@@ -25,9 +31,9 @@ async function getGreeting(id) {
 
 			const response =
 				"Hello from " +
-				name +
+				APP_NAME +
 				" at " +
-				version +
+				APP_VERSION +
 				"! We fetched: " +
 				title;
 
@@ -66,7 +72,8 @@ async function getCarouselItems(id) {
 				const rating = parseFloat(ratingText) || null;
 
 				const novel = {
-					extension: typeof name !== "undefined" ? name : "unknown",
+					extension:
+						typeof APP_NAME !== "undefined" ? APP_NAME : "unknown",
 					title: title || "Untitled",
 					link: link,
 					cover: cover,
@@ -98,7 +105,7 @@ async function getHomeItems(id) {
 			dom.find(".novel-item").each(function () {
 				const $el = $(this);
 				const novel = {
-					extension: name,
+					extension: APP_NAME,
 					title: $el.find("a").attr("title"),
 					link: $el.find("a").attr("href"),
 					cover: $el.find("img").attr("data-src"),
@@ -138,7 +145,7 @@ async function searchNovels(id, query) {
 			dom.find(".horizontal li.novel-item").each(function () {
 				const $el = $(this);
 				const novel = {
-					extension: name,
+					extension: APP_NAME,
 					title: $el.find("h4.novel-title").text().trim(),
 					link: $el.find("a").attr("href"),
 					cover:
@@ -171,7 +178,7 @@ async function getNovel(id, url) {
 			const dom = $(html);
 
 			const novel = {
-				extension: name,
+				extension: APP_NAME,
 				title: dom.find("h1.novel-title").text().trim() || "No Title",
 				altTitle: dom.find(".alternative-title").text().trim() || null,
 				cover:
