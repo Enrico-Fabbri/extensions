@@ -8,7 +8,7 @@ const APP_NAME =
 const APP_VERSION =
 	typeof globalThis.NOVELFIRE_VERSION !== "undefined"
 		? globalThis.NOVELFIRE_VERSION
-		: "0.0.3";
+		: "0.0.4";
 
 async function getGreeting(id) {
 	fetch(mainLink)
