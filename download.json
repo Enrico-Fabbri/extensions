@@ -1,9 +1,9 @@
 [
 	{
 		"name": "NovelFire",
-		"version": "0.0.3",
+		"version": "0.0.4",
 		"type": "NOVEL",
-		"download_url": "https://github.com/Enrico-Fabbri/extensions/releases/download/v0.0.3/novel_fire.js",
-		"checksum_sha256": "sha256:6db5be65d7e0390ed2c324cd2c5a3b90a2e41360a5adf178c3b2ebef35bb7c88"
+		"download_url": "https://github.com/Enrico-Fabbri/extensions/releases/download/v0.0.4/novel_fire.js",
+		"checksum_sha256": "sha256:ad6a6a097914a2b497341a2c56de43db1ac8d5cbd445abd9d710eb2c9726b773"
 	}
 ]
