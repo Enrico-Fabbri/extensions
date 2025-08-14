@@ -10,18 +10,7 @@ const APP_VERSION =
 		? globalThis.NOVELFIRE_VERSION
 		: "0.0.3";
 
-async function _ensureJQ() {
-	if (window.$ && typeof window.$ === "function") return;
-	await new Promise((resolve) => {
-		const s = document.createElement("script");
-		s.src = "https://code.jquery.com/jquery-3.7.1.min.js";
-		s.onload = resolve;
-		document.head.appendChild(s);
-	});
-}
-
 async function getGreeting(id) {
-	await _ensureJQ();
 	fetch(mainLink)
 		.then((response) => response.text())
 		.then((html) => {
@@ -37,105 +26,22 @@ async function getGreeting(id) {
 				"! We fetched: " +
 				title;
 
-			app.result(JSON.stringify({ id: id, data: response }));
+			bridge.result(JSON.stringify({ id: id, data: response }));
 		})
 		.catch((error) => {
-			app.result(JSON.stringify({ id: id, data: error.toString() }));
+			bridge.result(JSON.stringify({ id: id, data: error.toString() }));
 		})
 		.then(() => {
-			app.result(JSON.stringify({ id: id, data: null, done: true }));
-		});
-}
-
-async function getCarouselItems(id) {
-	await _ensureJQ();
-	fetch(mainLink)
-		.then((response) => response.text())
-		.then((html) => {
-			const dom = $(html);
-
-			dom.find(
-				"section.container:nth-child(1) > div:nth-child(2) > ul:nth-child(1) > li.novel-item"
-			).each(function () {
-				const $el = $(this);
-				const title = $el.find("a").attr("title")?.trim();
-				const link = $el.find("a").attr("href");
-				const cover =
-					$el.find("img").attr("data-src") ||
-					$el.find("img").attr("src");
-
-				const rankText = $el.find(".novel-stats span").text().trim();
-				const rankMatch = rankText.match(/RANK\s*(\d+)/i);
-				const rank = rankMatch ? parseInt(rankMatch[1]) : null;
-
-				const ratingText = $el.find(".badge._br").text().trim();
-				const rating = parseFloat(ratingText) || null;
-
-				const novel = {
-					extension:
-						typeof APP_NAME !== "undefined" ? APP_NAME : "unknown",
-					title: title || "Untitled",
-					link: link,
-					cover: cover,
-					rank: rank,
-					rating: rating,
-				};
-
-				app.result(JSON.stringify({ id: id, data: novel }));
-			});
-		})
-		.catch((error) => {
-			app.result(JSON.stringify({ id: id, error: error.toString() }));
-		})
-		.then(() => {
-			app.result(JSON.stringify({ id: id, data: null, done: true }));
-		});
-}
-
-async function getHomeItems(id) {
-	await _ensureJQ();
-	const link =
-		mainLink.slice(0, -4) + "genre-all/sort-new/status-all/all-novel";
-
-	fetch(link)
-		.then((response) => response.text())
-		.then((html) => {
-			const dom = $(html);
-
-			dom.find(".novel-item").each(function () {
-				const $el = $(this);
-				const novel = {
-					extension: APP_NAME,
-					title: $el.find("a").attr("title"),
-					link: $el.find("a").attr("href"),
-					cover: $el.find("img").attr("data-src"),
-					rank: $el.find(".badge._bl").text().replace(/[^\d]/g, ""),
-					chaptersNumber: $el
-						.find(".novel-stats")
-						.text()
-						.replace(/[^\d]/g, ""),
-				};
-
-				app.log(JSON.stringify(novel));
-
-				app.result(JSON.stringify({ id: id, data: novel }));
-			});
-		})
-		.catch((error) => {
-			app.result(JSON.stringify({ id: id, error: error.toString() }));
-		})
-		.then(() => {
-			app.result(JSON.stringify({ id: id, data: null, done: true }));
+			bridge.result(JSON.stringify({ id: id, data: null, done: true }));
 		});
 }
 
 async function searchNovels(id, query) {
-	await _ensureJQ();
 	const url = `https://novelfire.net/search?keyword=${encodeURIComponent(
 		query
 	)}`;
 
-	app.log(url);
+	bridge.log(url);
 
 	fetch(url)
 		.then((res) => res.text())
@@ -159,19 +65,18 @@ async function searchNovels(id, query) {
 						.trim(),
 				};
 
-				app.result(JSON.stringify({ id: id, data: novel }));
+				bridge.result(JSON.stringify({ id: id, data: novel }));
 			});
 		})
 		.catch((err) => {
-			app.result(JSON.stringify({ id: id, error: err.toString() }));
+			bridge.result(JSON.stringify({ id: id, error: err.toString() }));
 		})
 		.then(() => {
-			app.result(JSON.stringify({ id: id, data: null, done: true }));
+			bridge.result(JSON.stringify({ id: id, data: null, done: true }));
 		});
 }
 
 async function getNovel(id, url) {
-	await _ensureJQ();
 	fetch(url)
 		.then((res) => res.text())
 		.then((html) => {
@@ -233,22 +138,20 @@ async function getNovel(id, url) {
 						.trim() || null,
 			};
 
-			app.result(JSON.stringify({ id: id, data: novel }));
+			bridge.result(JSON.stringify({ id: id, data: novel }));
 		})
 		.catch((err) => {
-			app.result(JSON.stringify({ error: err.toString() }));
+			bridge.result(JSON.stringify({ error: err.toString() }));
 		})
 		.then(() => {
-			app.result(JSON.stringify({ id: id, data: null, done: true }));
+			bridge.result(JSON.stringify({ id: id, data: null, done: true }));
 		});
 }
 
 async function getChapters(id, url) {
-	await _ensureJQ();
 	let currentUrl = url + "/chapters";
 
 	async function fetchPage(nextUrl) {
-		await _ensureJQ();
 		fetch(nextUrl)
 			.then((res) => res.text())
 			.then((html) => {
@@ -264,7 +167,7 @@ async function getChapters(id, url) {
 					});
 				});
 
-				app.result(JSON.stringify({ id: id, data: allChapters }));
+				bridge.result(JSON.stringify({ id: id, data: allChapters }));
 
 				const next = dom
 					.find(".pagination .page-item a[rel='next']")
@@ -273,13 +176,15 @@ async function getChapters(id, url) {
 				if (next) {
 					fetchPage(next);
 				} else {
-					app.result(
+					bridge.result(
 						JSON.stringify({ id: id, data: null, done: true })
 					);
 				}
 			})
 			.catch((err) => {
-				app.result(JSON.stringify({ id: id, error: err.toString() }));
+				bridge.result(
+					JSON.stringify({ id: id, error: err.toString() })
+				);
 			});
 	}
 
@@ -287,7 +192,6 @@ async function getChapters(id, url) {
 }
 
 async function getChapter(id, url) {
-	await _ensureJQ();
 	fetch(url)
 		.then((res) => res.text())
 		.then((html) => {
@@ -334,12 +238,12 @@ async function getChapter(id, url) {
 				data: [{ body }],
 			};
 
-			app.result(JSON.stringify({ id: id, data: chapterData }));
+			bridge.result(JSON.stringify({ id: id, data: chapterData }));
 		})
 		.catch((err) => {
-			app.result(JSON.stringify({ id: id, error: err.toString() }));
+			bridge.result(JSON.stringify({ id: id, error: err.toString() }));
 		})
 		.then(() => {
-			app.result(JSON.stringify({ id: id, data: null, done: true }));
+			bridge.result(JSON.stringify({ id: id, data: null, done: true }));
 		});
 }
